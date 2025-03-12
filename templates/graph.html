@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-center space-x-4 mb-6">
+  <a href="/" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded">Home</a>
+  <a href="/eda" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded">EDA</a>
+</div>
+
+<div class="w-full">
+  <div class="bg-gray-800 p-6 rounded-lg mb-6">
+    <h2 class="text-2xl font-bold mb-4 text-left">Create Visualization</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label for="chartType" class="block text-left mb-2">Chart Type:</label>
+        <select id="chartType" class="w-full bg-gray-700 text-white py-2 px-3 rounded">
+          <option value="bar">Bar Chart</option>
+          <option value="line">Line Chart</option>
+          <option value="scatter">Scatter Plot</option>
+          <option value="pie">Pie Chart</option>
+          <option value="hist">Histogram</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="xColumn" class="block text-left mb-2">X-Axis Column:</label>
+        <select id="xColumn" class="w-full bg-gray-700 text-white py-2 px-3 rounded">
+          <option value="">Select Column</option>
+          {% for col in categorical_cols %}
+          <option value="{{ col }}">{{ col }}</option>
+          {% endfor %}
+          {% for col in numeric_cols %}
+          <option value="{{ col }}">{{ col }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div>
+        <label for="yColumn" class="block text-left mb-2">Y-Axis Column:</label>
+        <select id="yColumn" class="w-full bg-gray-700 text-white py-2 px-3 rounded">
+          <option value="">Select Column</option>
+          {% for col in numeric_cols %}
+          <option value="{{ col }}">{{ col }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    
+    <button id="generateBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded">
+      Generate Graph
+    </button>
+  </div>
+  
+  <div id="chartContainer" class="bg-gray-800 p-6 rounded-lg" style="display: none;">
+    <h2 class="text-2xl font-bold mb-4 text-left">Visualization</h2>
+    <div class="flex justify-center">
+      <img id="chartImage" src="" alt="Chart" class="max-w-full">
+    </div>
+  </div>
+  
+  <div id="errorContainer" class="bg-red-800 p-6 rounded-lg mt-4" style="display: none;">
+    <p id="errorMessage" class="text-white"></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const chartType = document.getElementById("chartType");
+    const xColumn = document.getElementById("xColumn");
+    const yColumn = document.getElementById("yColumn");
+    const generateBtn = document.getElementById("generateBtn");
+    const chartContainer = document.getElementById("chartContainer");
+    const chartImage = document.getElementById("chartImage");
+    const errorContainer = document.getElementById("errorContainer");
+    const errorMessage = document.getElementById("errorMessage");
+    
+    // Update column options based on chart type
+    chartType.addEventListener("change", function() {
+      if (chartType.value === "hist") {
+        xColumn.disabled = true;
+        xColumn.value = "";
+      } else {
+        xColumn.disabled = false;
+      }
+    });
+    
+    generateBtn.addEventListener("click", function() {
+      const selectedChartType = chartType.value;
+      const selectedXCol = xColumn.value;
+      const selectedYCol = yColumn.value;
+      
+      // Hide previous results
+      chartContainer.style.display = "none";
+      errorContainer.style.display = "none";
+      
+      if (selectedChartType === "hist" && !selectedYCol) {
+        showError("Please select a column for the histogram");
+        return;
+      }
+      
+      if (selectedChartType !== "hist" && (!selectedXCol || !selectedYCol)) {
+        showError("Please select both X and Y columns");
+        return;
+      }
+      
+      // Show loading state
+      generateBtn.disabled = true;
+      generateBtn.innerText = "Generating...";
+      
+      // Send request to generate graph
+      fetch("/generate_graph", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chart_type: selectedChartType,
+          x_col: selectedXCol,
+          y_col: selectedYCol
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        generateBtn.disabled = false;
+        generateBtn.innerText = "Generate Graph";
+        
+        if (data.error) {
+          showError(data.error);
+        } else {
+          chartImage.src = "data:image/png;base64," + data.image;
+          chartContainer.style.display = "block";
+        }
+      })
+      .catch(error => {
+        generateBtn.disabled = false;
+        generateBtn.innerText = "Generate Graph";
+        showError("Error generating chart: " + error);
+      });
+    });
+    
+    function showError(message) {
+      errorMessage.innerText = message;
+      errorContainer.style.display = "block";
+    }
+  });
+</script>
+{% endblock %}

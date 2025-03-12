@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Analyser - {{ title }}</title>
+  <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Londrina+Shadow&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    
+    header {
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      background-color: #1f2937;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      line-height: 24px;
+    }
+    
+    main {
+      margin-top: 60px;
+      padding: 20px;
+      width: 100%;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .content-container {
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center min-h-screen">
+  <header class="w-full flex justify-between items-center px-4 py-2 fixed top-0 bg-gray-900 z-10">
+    <div class="text-sm">SGS</div>
+    <div class="text-sm space-x-4">
+      <a class="hover:underline" href="#">LinkedIn</a>
+      <a class="hover:underline" href="#">Github</a>
+    </div>
+  </header>
+
+  <main class="flex flex-col items-center text-center mt-16 p-4">
+    <div class="logo-container">
+      <img alt="CSV logo" class="mb-4" height="50" 
+           src="https://storage.googleapis.com/a1aa/image/Tmxr48bGC2cgusUMf08sKSnK16CWk9-nCZemxDWh5wY.jpg" 
+           width="50"/>
+      <h1 class="text-4xl font-bold mb-2">
+        <span style="font-family: 'Share Tech Mono', monospace;">CSV</span>
+        <span class="text-blue-500" style="font-family: 'Londrina Shadow', cursive;">Analyser</span>
+      </h1>
+      <p class="text-gray-400 mb-8">{{ subtitle }}</p>
+    </div>
+
+    <div class="content-container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

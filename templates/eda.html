@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-center space-x-4 mb-6">
+  <a href="/" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded">Home</a>
+  <a href="/graph" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded">Visualize Data</a>
+</div>
+
+<div class="w-full">
+  <h2 class="text-2xl font-bold mb-4 text-left">Dataset Overview</h2>
+  <div class="bg-gray-800 p-4 rounded-lg mb-6">
+    <ul class="text-left">
+      <li><strong>Filename:</strong> {{ info.filename }}</li>
+      <li><strong>Rows:</strong> {{ info.row_count }}</li>
+      <li><strong>Columns:</strong> {{ info.column_count }}</li>
+    </ul>
+  </div>
+
+
+  <h2 class="text-2xl font-bold mb-4 text-left">Data Preview</h2>
+  <div class="overflow-x-auto bg-gray-800 p-4 rounded-lg mb-6">
+    {{ preview|safe }}
+  </div>
+
+  <h2 class="text-2xl font-bold mb-4 text-left">Column Data Types</h2>
+  <div class="bg-gray-800 p-4 rounded-lg mb-6 text-left">
+    <ul>
+      {% for col, dtype in dtypes.items() %}
+      <li><strong>{{ col }}:</strong> {{ dtype }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <h2 class="text-2xl font-bold mb-4 text-left">Missing Values</h2>
+  <div class="bg-gray-800 p-4 rounded-lg mb-6 text-left">
+    <ul>
+      {% for col, count in missing_values.items() %}
+      <li><strong>{{ col }}:</strong> {{ count }} missing values</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {% if has_numeric_columns %}
+  <h2 class="text-2xl font-bold mb-4 text-left">Summary Statistics</h2>
+  <div class="overflow-x-auto bg-gray-800 p-4 rounded-lg mb-6">
+    {{ numeric_summary|safe }}
+  </div>
+  {% endif %}
+
+  {% if correlation_plot %}
+  <h2 class="text-2xl font-bold mb-4 text-left">Correlation Heatmap</h2>
+  <div class="bg-gray-800 p-4 rounded-lg mb-6 flex justify-center">
+    <img src="data:image/png;base64,{{ correlation_plot }}" alt="Correlation Heatmap" class="max-w-full">
+  </div>
+  {% endif %}
+</div>
+<h2 class="text-2xl font-bold mb-4 text-left">Get Cleaned Data</h2>
+<div class="bg-gray-800 p-4 rounded-lg mb-6 flex justify-center">
+  <div>
+    <label class="block text-left mb-2">Choose How to Handle Missing Values:</label>
+    <select id="missingValueOption" class="w-full bg-gray-700 text-white py-2 px-3 rounded">
+      <option value="mean">Fill with Mean (Average)</option>
+      <option value="first">Fill with First Value</option>
+      <option value="last">Fill with Last Value</option>
+      <option value="delete">Delete Rows with Missing Values</option>
+    </select>
+  </div>
+  
+  <div>
+<button id="cleanDataBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded mt-4">
+  Clean & Download Data
+</button>
+
+<p id="cleanDataMessage" class="text-white mt-4"></p>
+
+</div>
+<script>
+  document.getElementById("cleanDataBtn").addEventListener("click", function() {
+    let selectedOption = document.getElementById("missingValueOption").value;
+
+    fetch("/clean_data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ missing_value_strategy: selectedOption })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        document.getElementById("cleanDataMessage").innerText = "Error: " + data.error;
+      } else {
+        document.getElementById("cleanDataMessage").innerHTML = 
+          "Data cleaned successfully! <a href='/download_cleaned' class='text-blue-400 underline'>Download Cleaned CSV</a>";
+      }
+    });
+  });
+</script>
+
+{% endblock %}

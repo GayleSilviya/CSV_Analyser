@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<button id="uploadBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-10 rounded">Upload CSV</button>
+<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="display: none;">
+  <input id="fileInput" type="file" name="file" accept=".csv">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const uploadBtn = document.getElementById("uploadBtn");
+    const fileInput = document.getElementById("fileInput");
+    const uploadForm = document.getElementById("uploadForm");
+    
+    uploadBtn.addEventListener("click", function() {
+      fileInput.click();
+    });
+    
+    fileInput.addEventListener("change", function() {
+      if (fileInput.files.length > 0) {
+        uploadForm.submit();
+      }
+    });
+  });
+</script>
+{% endblock %}

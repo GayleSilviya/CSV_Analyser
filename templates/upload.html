@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-wrap justify-center space-x-4 mb-2 w-full">
+  <a href="/eda" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded w-48">Perform EDA</a>
+  <a href="/graph" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded w-48">View Graphs</a>
+  <a href="/" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded w-48">Upload Another CSV</a>
+</div>
+
+<div class="mt-8 text-left bg-gray-800 p-6 rounded-lg w-full max-w-xl">
+  <h2 class="text-xl font-bold mb-4">File Information</h2>
+  <p><strong>Filename:</strong> {{ filename }}</p>
+  <p><strong>Rows:</strong> {{ row_count }}</p>
+</div>
+{% endblock %}
